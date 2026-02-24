@@ -1,0 +1,94 @@
+/**
+ * KodNest Premium Build System — Base
+ * Reset, typography, global layout. No decorative fonts; consistent scale.
+ */
+
+/* ─── Reset ─────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line);
+  -webkit-font-smoothing: antialiased;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ─── Typography ────────────────────────────────────────────────────────── */
+h1, h2, h3, .kn-heading {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: var(--text-heading-line);
+  letter-spacing: var(--text-heading-spacing);
+  color: var(--color-text);
+}
+
+.kn-heading-xl {
+  font-size: var(--text-heading-size-lg);
+}
+
+.kn-heading-lg {
+  font-size: var(--text-heading-size);
+}
+
+p, .kn-body {
+  max-width: var(--text-body-max-width);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line);
+}
+
+.kn-body-lg {
+  font-size: var(--text-body-size-lg);
+  line-height: var(--text-body-line-lg);
+}
+
+.kn-text-small {
+  font-size: var(--text-small-size);
+  color: var(--color-muted);
+}
+
+.kn-text-caption {
+  font-size: var(--text-caption-size);
+  color: var(--color-muted);
+}
+
+/* ─── Focus (clear, consistent) ─────────────────────────────────────────── */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+/* ─── Selection ─────────────────────────────────────────────────────────── */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}

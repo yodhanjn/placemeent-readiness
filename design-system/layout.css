@@ -1,0 +1,129 @@
+/**
+ * KodNest Premium Build System — Layout
+ * [Top Bar] → [Context Header] → [Workspace + Panel] → [Proof Footer]
+ * One structure, no drift.
+ */
+
+/* ─── App shell ─────────────────────────────────────────────────────────── */
+.kn-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Top Bar ───────────────────────────────────────────────────────────── */
+.kn-topbar {
+  height: var(--layout-topbar-height);
+  padding: 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: var(--border-width) solid var(--border-color);
+  background-color: var(--color-bg);
+}
+
+.kn-topbar__project {
+  font-family: var(--font-serif);
+  font-size: var(--text-body-size);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.kn-topbar__progress {
+  font-size: var(--text-small-size);
+  color: var(--color-muted);
+}
+
+.kn-topbar__status {
+  /* Badge lives in components.css */
+}
+
+/* ─── Context Header ────────────────────────────────────────────────────── */
+.kn-context-header {
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.kn-context-header__headline {
+  font-family: var(--font-serif);
+  font-size: var(--text-heading-size-lg);
+  font-weight: 600;
+  line-height: var(--text-heading-line);
+  letter-spacing: var(--text-heading-spacing);
+  margin-bottom: var(--space-1);
+}
+
+.kn-context-header__subtext {
+  font-size: var(--text-body-size);
+  color: var(--color-muted);
+  max-width: var(--text-body-max-width);
+}
+
+/* ─── Main content (Workspace + Panel) ────────────────────────────────────── */
+.kn-main {
+  flex: 1;
+  display: flex;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 var(--space-3) var(--space-4);
+  gap: var(--space-4);
+}
+
+/* ─── Primary Workspace (70%) ────────────────────────────────────────────── */
+.kn-workspace {
+  flex: 0 0 var(--layout-workspace-width);
+  min-width: 0;
+}
+
+/* ─── Secondary Panel (30%) ─────────────────────────────────────────────── */
+.kn-panel {
+  flex: 0 0 var(--layout-panel-width);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ─── Proof Footer ──────────────────────────────────────────────────────── */
+.kn-proof-footer {
+  height: var(--layout-footer-height);
+  padding: 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-top: var(--border-width) solid var(--border-color);
+  background-color: var(--color-bg);
+}
+
+.kn-proof-footer__checklist {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.kn-proof-footer__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-small-size);
+  color: var(--color-muted);
+}
+
+.kn-proof-footer__item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.kn-proof-footer__item--done {
+  color: var(--color-success);
+}

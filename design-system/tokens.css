@@ -1,0 +1,65 @@
+/**
+ * KodNest Premium Build System — Design Tokens
+ * Calm, intentional, coherent. Maximum 4 colors. 8px spacing scale.
+ */
+
+:root {
+  /* ─── Color (4 only) ───────────────────────────────────────────────────── */
+  --color-bg: #F7F6F3;
+  --color-text: #111111;
+  --color-accent: #8B0000;
+  --color-muted: #6B6560;
+
+  /* Semantic (muted variants of the same palette) */
+  --color-success: #4A5D4A;
+  --color-warning: #6B5D3D;
+  --color-border: #E0DDD8;
+  --color-border-focus: #8B0000;
+
+  /* ─── Typography ──────────────────────────────────────────────────────── */
+  --font-serif: "Lora", "Georgia", serif;
+  --font-sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+
+  --text-heading-size: 2rem;
+  --text-heading-size-lg: 2.5rem;
+  --text-heading-line: 1.25;
+  --text-heading-spacing: 0.02em;
+
+  --text-body-size: 1rem;
+  --text-body-size-lg: 1.125rem;
+  --text-body-line: 1.6;
+  --text-body-line-lg: 1.8;
+  --text-body-max-width: 720px;
+
+  --text-small-size: 0.875rem;
+  --text-caption-size: 0.8125rem;
+
+  /* ─── Spacing (scale: 8, 16, 24, 40, 64) ──────────────────────────────── */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 40px;
+  --space-5: 64px;
+
+  /* ─── Layout ─────────────────────────────────────────────────────────── */
+  --layout-workspace-width: 70%;
+  --layout-panel-width: 30%;
+  --layout-max-width: 1200px;
+  --layout-topbar-height: 56px;
+  --layout-footer-height: 80px;
+
+  /* ─── Radii & borders ─────────────────────────────────────────────────── */
+  --radius: 6px;
+  --radius-sm: 4px;
+  --border-width: 1px;
+  --border-color: var(--color-border);
+
+  /* ─── Interaction ─────────────────────────────────────────────────────── */
+  --transition-duration: 180ms;
+  --transition-ease: ease-in-out;
+  --transition: var(--transition-duration) var(--transition-ease);
+
+  /* ─── Shadows (subtle only) ───────────────────────────────────────────── */
+  --shadow-none: none;
+  --shadow-focus: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
+}
