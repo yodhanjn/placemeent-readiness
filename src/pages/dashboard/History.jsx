@@ -34,10 +34,10 @@ export default function HistoryPage() {
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 max-w-full">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">History</h2>
-        <p className="text-gray-600">Past JD analyses. Click to view full results.</p>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">History</h2>
+        <p className="text-sm md:text-base text-gray-600">Past JD analyses. Click to view full results.</p>
       </div>
 
       <Card>

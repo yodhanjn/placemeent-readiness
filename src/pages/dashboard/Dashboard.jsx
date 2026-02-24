@@ -66,13 +66,13 @@ const weeklyPercent = weeklyTarget > 0 ? Math.min(100, (weeklySolved / weeklyTar
 
 export default function Dashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 max-w-full">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-        <p className="text-gray-600">Your placement prep at a glance.</p>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard</h2>
+        <p className="text-sm md:text-base text-gray-600">Your placement prep at a glance.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* 1. Overall Readiness */}
         <Card>
           <CardHeader>
@@ -207,15 +207,15 @@ export default function Dashboard() {
                 style={{ width: `${weeklyPercent}%` }}
               />
             </div>
-            <div className="flex items-center justify-between gap-2 pt-2">
+            <div className="flex items-center justify-between gap-1 sm:gap-2 pt-2 min-w-0">
               {WEEK_DAYS.map(({ label, active }) => (
                 <div
                   key={label}
-                  className="flex flex-col items-center gap-1"
+                  className="flex flex-col items-center gap-0.5 sm:gap-1 min-w-0 flex-1"
                   title={active ? 'Activity' : 'No activity'}
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${
                       active
                         ? 'bg-primary text-white'
                         : 'bg-gray-100 text-gray-400'
@@ -223,7 +223,7 @@ export default function Dashboard() {
                   >
                     {label.slice(0, 1)}
                   </div>
-                  <span className="text-xs text-gray-500">{label}</span>
+                  <span className="text-[10px] sm:text-xs text-gray-500 truncate w-full text-center">{label}</span>
                 </div>
               ))}
             </div>

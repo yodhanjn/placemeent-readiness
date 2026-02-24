@@ -186,10 +186,10 @@ export default function Results() {
   const top3Weak = practiceSkills.slice(0, 3)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 max-w-full">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Analysis results</h2>
-        <p className="text-gray-600">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Analysis results</h2>
+        <p className="text-sm md:text-base text-gray-600 truncate">
           {company && `${company}${role ? ` · ${role}` : ''}`}
           {!company && !role && 'Your latest JD analysis'}
         </p>
@@ -242,20 +242,20 @@ export default function Results() {
                       return (
                         <div
                           key={s}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white overflow-hidden"
+                          className="inline-flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-0 rounded-lg border border-gray-200 bg-white overflow-hidden min-w-0 w-full sm:w-auto"
                         >
                           <span
-                            className={`px-2.5 py-1 text-sm font-medium ${
+                            className={`px-3 py-2 sm:py-1 sm:px-2.5 text-sm font-medium shrink-0 ${
                               isKnow ? 'bg-primary/15 text-primary' : 'bg-amber-50 text-amber-800'
                             }`}
                           >
                             {s}
                           </span>
-                          <div className="flex rounded-r-lg overflow-hidden border-l border-gray-200">
+                          <div className="flex rounded-b-lg sm:rounded-b-none sm:rounded-r-lg overflow-hidden border-t sm:border-t-0 sm:border-l border-gray-200">
                             <button
                               type="button"
                               onClick={() => setSkillConfidence(s, 'practice')}
-                              className={`px-2 py-1 text-xs font-medium transition-colors ${
+                              className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2.5 sm:py-1 sm:px-2 text-xs sm:text-xs font-medium transition-colors ${
                                 !isKnow
                                   ? 'bg-amber-100 text-amber-900'
                                   : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
@@ -267,7 +267,7 @@ export default function Results() {
                             <button
                               type="button"
                               onClick={() => setSkillConfidence(s, 'know')}
-                              className={`px-2 py-1 text-xs font-medium transition-colors ${
+                              className={`flex-1 min-h-[44px] sm:min-h-0 px-3 py-2.5 sm:py-1 sm:px-2 text-xs font-medium transition-colors ${
                                 isKnow
                                   ? 'bg-primary/20 text-primary'
                                   : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
@@ -438,7 +438,7 @@ export default function Results() {
       </Card>
 
       {copyFeedback && (
-        <div className="fixed bottom-6 right-6 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm shadow-lg">
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 max-w-[calc(100vw-2rem)] sm:max-w-none px-4 py-2 rounded-lg bg-gray-900 text-white text-sm shadow-lg text-center sm:text-left">
           {copyFeedback}
         </div>
       )}

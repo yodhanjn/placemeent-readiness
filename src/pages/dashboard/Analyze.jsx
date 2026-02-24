@@ -51,10 +51,10 @@ export default function Analyze() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 max-w-full">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Analyze JD</h2>
-        <p className="text-gray-600">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900">Analyze JD</h2>
+        <p className="text-sm md:text-base text-gray-600">
           Paste a job description to extract skills and get a preparation plan.
         </p>
       </div>
@@ -71,7 +71,7 @@ export default function Analyze() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
                   Company
