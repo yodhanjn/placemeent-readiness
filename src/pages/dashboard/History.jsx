@@ -26,7 +26,11 @@ export default function HistoryPage() {
   const [entries, setEntries] = useState([])
 
   useEffect(() => {
-    setEntries(getHistory())
+    try {
+      setEntries(getHistory())
+    } catch {
+      setEntries([])
+    }
   }, [])
 
   return (
