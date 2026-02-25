@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '../../components/ui/Card'
 import { getAnalysisById, getLatestAnalysis, updateAnalysisById } from '../../lib/storage'
+import { getCompanyIntel, buildRoundMapping } from '../../lib/companyIntel'
 import {
   Award,
   Tag,
@@ -17,6 +18,8 @@ import {
   Copy,
   Download,
   Lightbulb,
+  Building2,
+  GitBranch,
 } from 'lucide-react'
 
 const DEFAULT_CONFIDENCE = 'practice'
@@ -185,6 +188,9 @@ export default function Results() {
   const practiceSkills = allSkills.filter((s) => (skillConfidenceMap[s] || DEFAULT_CONFIDENCE) === 'practice')
   const top3Weak = practiceSkills.slice(0, 3)
 
+  const companyIntel = entry.companyIntel ?? (entry.company ? getCompanyIntel(entry.company, entry.jdText) : null)
+  const roundMapping = entry.roundMapping?.length ? entry.roundMapping : (companyIntel ? buildRoundMapping(companyIntel, extractedSkills) : [])
+
   return (
     <div className="space-y-4 md:space-y-6 max-w-full">
       <div>
@@ -215,6 +221,69 @@ export default function Results() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Company Intel – when company provided */}
+      {companyIntel && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Company intel
+            </CardTitle>
+            <CardDescription>Inferred from company name (heuristic)</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-gray-500 block">Company</span>
+                <span className="font-medium text-gray-900">{companyIntel.name}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Industry</span>
+                <span className="font-medium text-gray-900">{companyIntel.industry}</span>
+              </div>
+              <div>
+                <span className="text-gray-500 block">Estimated size</span>
+                <span className="font-medium text-gray-900">{companyIntel.sizeLabel}</span>
+              </div>
+            </div>
+            <div>
+              <span className="text-gray-500 block text-sm mb-1">Typical hiring focus</span>
+              <p className="text-sm text-gray-700">{companyIntel.typicalHiringFocus}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Round Mapping – vertical timeline */}
+      {roundMapping.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <GitBranch className="w-5 h-5 text-primary" />
+              Round mapping
+            </CardTitle>
+            <CardDescription>Expected interview flow based on company and skills</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="relative pl-6 border-l-2 border-gray-200 space-y-5">
+              {roundMapping.map((round) => (
+                <div key={round.id} className="relative">
+                  <div className="absolute -left-[29px] top-0.5 w-3 h-3 rounded-full bg-primary border-2 border-white shadow-sm" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">{round.name}</h3>
+                    <p className="text-xs md:text-sm text-gray-600 mt-1">Why this round matters: {round.whyMatters}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {(companyIntel || roundMapping.length > 0) && (
+        <p className="text-xs text-gray-400">Demo Mode: Company intel generated heuristically.</p>
+      )}
 
       {/* Key skills extracted – interactive toggles */}
       <Card>

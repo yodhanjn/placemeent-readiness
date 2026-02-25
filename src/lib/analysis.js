@@ -4,6 +4,7 @@
  */
 
 import { extractSkills, getDisplayStack } from './skills'
+import { getCompanyIntel, buildRoundMapping } from './companyIntel'
 
 const ROUNDS = [
   { id: 'r1', name: 'Round 1: Aptitude / Basics', key: 'round1' },
@@ -301,11 +302,20 @@ export function runFullAnalysis(company, role, jdText) {
   const plan = buildPlan(extracted)
   const questions = buildQuestions(extracted)
   const readinessScore = computeReadinessScore({ company, role, jdText, extracted })
+
+  const companyName = (company || '').trim()
+  const companyIntel = companyName ? getCompanyIntel(companyName, jdText) : null
+  const roundMapping = companyIntel
+    ? buildRoundMapping(companyIntel, extracted)
+    : []
+
   return {
     extractedSkills: { ...extracted, displayStack },
     checklist,
     plan,
     questions,
     readinessScore,
+    companyIntel,
+    roundMapping,
   }
 }
