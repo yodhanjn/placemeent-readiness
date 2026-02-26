@@ -1,8 +1,10 @@
 /**
  * Persist analysis history in localStorage.
  * Key: placement-readiness-history
- * Value: array of analysis entries.
+ * Value: array of analysis entries (normalized to canonical schema).
  */
+
+import { normalizeEntry, validateEntry } from './schema'
 
 const STORAGE_KEY = 'placement-readiness-history'
 
@@ -28,37 +30,67 @@ function saveRaw(entries) {
 
 export function saveAnalysis(entry) {
   const list = loadRaw()
-  const id = entry.id || `analysis-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-  const withId = { ...entry, id, createdAt: entry.createdAt || new Date().toISOString() }
-  list.unshift(withId)
+  const withId = { ...entry, id: entry.id || `analysis-${Date.now()}-${Math.random().toString(36).slice(2, 9)}` }
+  const normalized = normalizeEntry(withId)
+  if (!normalized || !validateEntry(normalized)) return null
+  normalized.updatedAt = new Date().toISOString()
+  list.unshift(normalized)
   saveRaw(list)
-  return withId
+  return normalized
 }
 
+/** @returns {{ entries: object[], skippedCount: number }} */
 export function getHistory() {
-  return loadRaw()
+  const raw = loadRaw()
+  const entries = []
+  let skippedCount = 0
+  for (const e of raw) {
+    try {
+      const normalized = normalizeEntry(e)
+      if (normalized && validateEntry(normalized)) {
+        entries.push(normalized)
+      } else {
+        skippedCount += 1
+      }
+    } catch {
+      skippedCount += 1
+    }
+  }
+  return { entries, skippedCount }
 }
 
 export function getAnalysisById(id) {
-  const list = loadRaw()
-  return list.find((e) => e.id === id) || null
+  const raw = loadRaw()
+  const found = raw.find((e) => e.id === id)
+  if (!found) return null
+  const normalized = normalizeEntry(found)
+  return normalized && validateEntry(normalized) ? normalized : null
 }
 
 export function getLatestAnalysis() {
-  const list = loadRaw()
-  return list.length > 0 ? list[0] : null
+  const raw = loadRaw()
+  for (const e of raw) {
+    try {
+      const normalized = normalizeEntry(e)
+      if (normalized && validateEntry(normalized)) return normalized
+    } catch {
+      continue
+    }
+  }
+  return null
 }
 
 /**
- * Update an existing history entry by id. Merges updates into the entry and saves.
- * Used to persist skillConfidenceMap and live readinessScore.
+ * Update an existing history entry by id. Merges updates (e.g. skillConfidenceMap, finalScore), sets updatedAt, normalizes and saves.
  */
 export function updateAnalysisById(id, updates) {
   const list = loadRaw()
   const index = list.findIndex((e) => e.id === id)
   if (index === -1) return null
-  const updated = { ...list[index], ...updates }
-  list[index] = updated
+  const updated = { ...list[index], ...updates, updatedAt: new Date().toISOString() }
+  const normalized = normalizeEntry(updated)
+  if (!normalized || !validateEntry(normalized)) return null
+  list[index] = normalized
   saveRaw(list)
-  return updated
+  return normalized
 }

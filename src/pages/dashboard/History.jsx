@@ -25,11 +25,16 @@ function formatDate(iso) {
 export default function HistoryPage() {
   const [entries, setEntries] = useState([])
 
+  const [skippedCount, setSkippedCount] = useState(0)
+
   useEffect(() => {
     try {
-      setEntries(getHistory())
+      const { entries: list, skippedCount: skipped } = getHistory()
+      setEntries(list)
+      setSkippedCount(skipped)
     } catch {
       setEntries([])
+      setSkippedCount(0)
     }
   }, [])
 
@@ -49,6 +54,11 @@ export default function HistoryPage() {
           <CardDescription>Date, company, role, and readiness score</CardDescription>
         </CardHeader>
         <CardContent>
+          {skippedCount > 0 && (
+            <p className="text-sm text-amber-700 bg-amber-50 px-3 py-2 rounded-lg mb-4">
+              One saved entry couldn&apos;t be loaded. Create a new analysis.
+            </p>
+          )}
           {entries.length === 0 ? (
             <p className="text-gray-500 py-8 text-center">
               No analyses yet. Analyze a JD to see history here.
@@ -69,7 +79,7 @@ export default function HistoryPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold text-primary">
-                        {e.readinessScore ?? '—'}/100
+                        {e.finalScore ?? e.readinessScore ?? '—'}/100
                       </span>
                       <ChevronRight className="w-5 h-5 text-gray-400" />
                     </div>

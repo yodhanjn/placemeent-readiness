@@ -9,6 +9,7 @@ import {
 } from '../../components/ui/Card'
 import { runFullAnalysis } from '../../lib/analysis'
 import { saveAnalysis } from '../../lib/storage'
+import { JD_MIN_LENGTH_WARNING } from '../../lib/schema'
 import { FileText } from 'lucide-react'
 
 export default function Analyze() {
@@ -38,12 +39,17 @@ export default function Analyze() {
         plan: result.plan,
         checklist: result.checklist,
         questions: result.questions,
-        readinessScore: result.readinessScore,
-        baseReadinessScore: result.readinessScore,
+        baseScore: result.baseScore,
+        finalScore: result.baseScore,
+        skillConfidenceMap: {},
         companyIntel: result.companyIntel ?? null,
         roundMapping: result.roundMapping ?? [],
       }
       const saved = saveAnalysis(entry)
+      if (!saved) {
+        setError('Could not save analysis. Please try again.')
+        return
+      }
       navigate(`/dashboard/results?id=${saved.id}`, { replace: true })
     } catch (err) {
       setError(err?.message || 'Analysis failed. Please try again.')
@@ -111,8 +117,14 @@ export default function Analyze() {
                 onChange={(e) => setJdText(e.target.value)}
                 placeholder="Paste the full job description here..."
                 rows={12}
+                required
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-y min-h-[200px]"
               />
+              {(jdText || '').trim().length > 0 && (jdText || '').trim().length < JD_MIN_LENGTH_WARNING && (
+                <p className="mt-1.5 text-sm text-amber-700 bg-amber-50 px-3 py-2 rounded-lg">
+                  This JD is too short to analyze deeply. Paste full JD for better output.
+                </p>
+              )}
             </div>
             {error && (
               <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>

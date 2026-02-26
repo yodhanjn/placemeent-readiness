@@ -1,10 +1,12 @@
 /**
  * Analysis generation: checklist, 7-day plan, questions, readiness score.
  * Template-based from extracted skills. No external APIs.
+ * Uses canonical extractedSkills schema; defaults "other" when no skills detected.
  */
 
 import { extractSkills, getDisplayStack } from './skills'
 import { getCompanyIntel, buildRoundMapping } from './companyIntel'
+import { toCanonicalExtractedSkills, getCategoriesForDisplay, getAllSkillsFromExtracted, DEFAULT_OTHER_SKILLS } from './schema'
 
 const ROUNDS = [
   { id: 'r1', name: 'Round 1: Aptitude / Basics', key: 'round1' },
@@ -297,24 +299,30 @@ export function computeReadinessScore(payload) {
 
 export function runFullAnalysis(company, role, jdText) {
   const extracted = extractSkills(jdText)
-  const displayStack = getDisplayStack(extracted)
-  const checklist = buildChecklist(extracted)
-  const plan = buildPlan(extracted)
-  const questions = buildQuestions(extracted)
-  const readinessScore = computeReadinessScore({ company, role, jdText, extracted })
+  const canonicalSkills = toCanonicalExtractedSkills(extracted.categories, extracted.hasAny)
+  if (getAllSkillsFromExtracted(canonicalSkills).length === 0) {
+    canonicalSkills.other = [...DEFAULT_OTHER_SKILLS]
+  }
+  const extractedForBuild = { categories: getCategoriesForDisplay(canonicalSkills) }
+
+  const checklist = buildChecklist(extractedForBuild)
+  const plan = buildPlan(extractedForBuild)
+  const questions = buildQuestions(extractedForBuild)
+  const baseScore = computeReadinessScore({ company, role, jdText, extracted: extractedForBuild })
 
   const companyName = (company || '').trim()
   const companyIntel = companyName ? getCompanyIntel(companyName, jdText) : null
   const roundMapping = companyIntel
-    ? buildRoundMapping(companyIntel, extracted)
+    ? buildRoundMapping(companyIntel, extractedForBuild)
     : []
 
   return {
-    extractedSkills: { ...extracted, displayStack },
+    extractedSkills: canonicalSkills,
+    displayStack: getDisplayStack(extracted),
     checklist,
     plan,
     questions,
-    readinessScore,
+    baseScore,
     companyIntel,
     roundMapping,
   }

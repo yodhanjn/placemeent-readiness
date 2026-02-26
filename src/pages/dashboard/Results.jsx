@@ -9,6 +9,18 @@ import {
 } from '../../components/ui/Card'
 import { getAnalysisById, getLatestAnalysis, updateAnalysisById } from '../../lib/storage'
 import { getCompanyIntel, buildRoundMapping } from '../../lib/companyIntel'
+import { getCategoriesForDisplay, getAllSkillsFromExtracted } from '../../lib/schema'
+
+/** Fixed order for displaying skill categories (matches schema) */
+const CATEGORY_DISPLAY_ORDER = [
+  'Core CS',
+  'Languages',
+  'Web',
+  'Data',
+  'Cloud/DevOps',
+  'Testing',
+  'Other',
+]
 import {
   Award,
   Tag,
@@ -38,8 +50,9 @@ function formatPlanAsText(plan) {
   if (!plan || !plan.length) return ''
   return plan
     .map((day) => {
+      const label = day.label ?? day.focus ?? day.day ?? ''
       const tasks = (day.tasks || []).map((t) => `  • ${t}`).join('\n')
-      return `${day.label}\n${tasks}`
+      return `${label}\n${tasks}`
     })
     .join('\n\n')
 }
@@ -48,8 +61,9 @@ function formatChecklistAsText(checklist) {
   if (!checklist || !checklist.length) return ''
   return checklist
     .map((round) => {
+      const title = round.roundTitle ?? round.name ?? ''
       const items = (round.items || []).map((i) => `  • ${i}`).join('\n')
-      return `${round.name}\n${items}`
+      return `${title}\n${items}`
     })
     .join('\n\n')
 }
@@ -67,14 +81,9 @@ export default function Results() {
   const [copyFeedback, setCopyFeedback] = useState(null)
 
   useEffect(() => {
-    let found = null
-    if (id) found = getAnalysisById(id)
-    if (!found) found = getLatestAnalysis()
-    if (found && found.readinessScore != null && found.baseReadinessScore == null) {
-      updateAnalysisById(found.id, { baseReadinessScore: found.readinessScore })
-      found = { ...found, baseReadinessScore: found.readinessScore }
-    }
-    setEntry(found)
+    const found = id ? getAnalysisById(id) : null
+    const resolved = found ?? getLatestAnalysis()
+    setEntry(resolved)
     setLoading(false)
   }, [id])
 
@@ -86,14 +95,15 @@ export default function Results() {
 
   const setSkillConfidence = useCallback(
     (skill, value) => {
-      const map = { ...(entry?.skillConfidenceMap || {}), [skill]: value }
-      const allSkills = getAllSkillsFromEntry(entry)
-      const base = entry?.baseReadinessScore ?? entry?.readinessScore ?? 0
-      const liveScore = computeLiveScore(base, map, allSkills)
+      if (!entry?.id) return
+      const map = { ...(entry.skillConfidenceMap || {}), [skill]: value }
+      const allSkills = getAllSkillsFromExtracted(entry.extractedSkills)
+      const base = entry.baseScore ?? entry.baseReadinessScore ?? entry.readinessScore ?? 0
+      const finalScore = computeLiveScore(base, map, allSkills)
       setEntry((prev) =>
-        prev ? { ...prev, skillConfidenceMap: map, readinessScore: liveScore } : prev
+        prev ? { ...prev, skillConfidenceMap: map, finalScore } : prev
       )
-      persistEntry({ skillConfidenceMap: map, readinessScore: liveScore })
+      persistEntry({ skillConfidenceMap: map, finalScore })
     },
     [entry, persistEntry]
   )
@@ -111,21 +121,24 @@ export default function Results() {
 
   const downloadTxt = useCallback(() => {
     if (!entry) return
-    const { company, role, readinessScore, extractedSkills, checklist, plan, questions } = entry
-    const categories = extractedSkills?.categories || {}
+    const { company, role, extractedSkills, questions } = entry
+    const categories = getCategoriesForDisplay(extractedSkills)
+    const score = entry.finalScore ?? entry.readinessScore ?? 0
+    const checklist = entry.checklist ?? []
+    const plan = entry.plan7Days?.length ? entry.plan7Days : entry.plan ?? []
     const sections = [
       '=== Placement Readiness – Analysis ===',
       '',
       `Company: ${company || '—'}`,
       `Role: ${role || '—'}`,
-      `Readiness Score: ${readinessScore ?? 0}/100`,
+      `Readiness Score: ${score}/100`,
       '',
       '--- Key skills extracted ---',
       ...(Object.keys(categories).length
         ? Object.entries(categories).flatMap(([cat, skills]) => [
             `${cat}: ${skills.join(', ')}`,
           ])
-        : [extractedSkills?.displayStack || '—']),
+        : ['General fresher stack']),
       '',
       '--- Round-wise checklist ---',
       formatChecklistAsText(checklist),
@@ -172,24 +185,21 @@ export default function Results() {
     )
   }
 
-  const { company, role, readinessScore, extractedSkills, checklist, plan, questions } = entry
-  const categories = extractedSkills?.categories || {}
-  const displayStack = extractedSkills?.displayStack
+  const { company, role, extractedSkills, questions } = entry
+  const categories = getCategoriesForDisplay(extractedSkills)
+  const displayStack = Object.keys(categories).length === 0 ? 'General fresher stack' : null
   const skillConfidenceMap = entry.skillConfidenceMap || {}
-
-  function getAllSkillsFromEntry(e) {
-    const cat = e?.extractedSkills?.categories || {}
-    return Object.values(cat).flat()
-  }
-
-  const allSkills = getAllSkillsFromEntry(entry)
-  const baseScore = entry.baseReadinessScore ?? entry.readinessScore ?? 0
+  const allSkills = getAllSkillsFromExtracted(extractedSkills)
+  const baseScore = entry.baseScore ?? entry.baseReadinessScore ?? entry.readinessScore ?? 0
   const liveScore = computeLiveScore(baseScore, skillConfidenceMap, allSkills)
   const practiceSkills = allSkills.filter((s) => (skillConfidenceMap[s] || DEFAULT_CONFIDENCE) === 'practice')
   const top3Weak = practiceSkills.slice(0, 3)
 
   const companyIntel = entry.companyIntel ?? (entry.company ? getCompanyIntel(entry.company, entry.jdText) : null)
-  const roundMapping = entry.roundMapping?.length ? entry.roundMapping : (companyIntel ? buildRoundMapping(companyIntel, extractedSkills) : [])
+  const extractedForRoundMapping = { categories }
+  const roundMapping = entry.roundMapping?.length ? entry.roundMapping : (companyIntel ? buildRoundMapping(companyIntel, extractedForRoundMapping) : [])
+  const checklist = entry.checklist ?? []
+  const plan = entry.plan7Days?.length ? entry.plan7Days : (entry.plan ?? [])
 
   return (
     <div className="space-y-4 md:space-y-6 max-w-full">
@@ -267,12 +277,12 @@ export default function Results() {
           </CardHeader>
           <CardContent>
             <div className="relative pl-6 border-l-2 border-gray-200 space-y-5">
-              {roundMapping.map((round) => (
-                <div key={round.id} className="relative">
+              {roundMapping.map((round, i) => (
+                <div key={round.id ?? i} className="relative">
                   <div className="absolute -left-[29px] top-0.5 w-3 h-3 rounded-full bg-primary border-2 border-white shadow-sm" />
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">{round.name}</h3>
-                    <p className="text-xs md:text-sm text-gray-600 mt-1">Why this round matters: {round.whyMatters}</p>
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base">{round.roundTitle ?? round.name}</h3>
+                    <p className="text-xs md:text-sm text-gray-600 mt-1">Why this round matters: {round.whyItMatters ?? round.whyMatters}</p>
                   </div>
                 </div>
               ))}
@@ -298,14 +308,18 @@ export default function Results() {
           {displayStack ? (
             <p className="text-gray-600">{displayStack}</p>
           ) : (
-            <div className="flex flex-wrap gap-3">
-              {Object.entries(categories).map(([cat, skills]) => (
-                <div key={cat} className="space-y-1.5">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                    {cat}
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {skills.map((s) => {
+            <div className="space-y-6">
+              {CATEGORY_DISPLAY_ORDER.filter(
+                (cat) => Array.isArray(categories[cat]) && categories[cat].length > 0
+              ).map((cat) => {
+                const skills = categories[cat]
+                return (
+                  <div key={cat} className="space-y-2">
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide block border-b border-gray-100 pb-1">
+                      {cat}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((s) => {
                       const confidence = skillConfidenceMap[s] || DEFAULT_CONFIDENCE
                       const isKnow = confidence === 'know'
                       return (
@@ -349,9 +363,10 @@ export default function Results() {
                         </div>
                       )
                     })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </CardContent>
@@ -381,12 +396,12 @@ export default function Results() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {(checklist || []).map((round) => (
-            <div key={round.id}>
-              <h3 className="font-semibold text-gray-900 mb-2">{round.name}</h3>
+          {checklist.map((round, i) => (
+            <div key={round.id ?? i}>
+              <h3 className="font-semibold text-gray-900 mb-2">{round.roundTitle ?? round.name}</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-600 text-sm">
-                {(round.items || []).map((item, i) => (
-                  <li key={i}>{item}</li>
+                {(round.items || []).map((item, j) => (
+                  <li key={j}>{item}</li>
                 ))}
               </ul>
             </div>
@@ -416,9 +431,9 @@ export default function Results() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {(plan || []).map((day, i) => (
+          {plan.map((day, i) => (
             <div key={i}>
-              <h3 className="font-semibold text-gray-900 mb-1">{day.label}</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">{day.label ?? day.focus ?? day.day}</h3>
               <ul className="list-disc list-inside space-y-0.5 text-gray-600 text-sm">
                 {(day.tasks || []).map((t, j) => (
                   <li key={j}>{t}</li>
