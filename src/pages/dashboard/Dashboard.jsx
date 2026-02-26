@@ -126,8 +126,8 @@ export default function Dashboard() {
             <CardDescription>Scores across key placement areas</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[240px] w-full min-w-0 overflow-hidden">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[240px] min-h-[240px] w-full min-w-0 overflow-hidden" style={{ minWidth: 0, minHeight: 240 }}>
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={240}>
                 <RadarChart data={skillData} margin={{ top: 16, right: 24, left: 24, bottom: 16 }}>
                   <PolarGrid stroke="#e5e7eb" />
                   <PolarAngleAxis
