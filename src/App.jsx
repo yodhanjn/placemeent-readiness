@@ -9,11 +9,15 @@ import Profile from './pages/dashboard/Profile'
 import Analyze from './pages/dashboard/Analyze'
 import Results from './pages/dashboard/Results'
 import History from './pages/dashboard/History'
+import TestChecklist from './pages/TestChecklist'
+import ShipGuard from './components/ShipGuard'
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/prp/07-test" element={<TestChecklist />} />
+      <Route path="/prp/08-ship" element={<ShipGuard />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="practice" element={<Practice />} />
